@@ -37,6 +37,17 @@ struct _rknn_matmul_ctx {
 
 _rknn_matmul_ctx* make_matmul(int32_t M, int32_t K, int32_t N);
 
+template<typename T>
+void set_matrix_data(rknn_matmul_ctx* ctx, rknn_tensor_mem* mem, rknn_matmul_tensor_attr* attr, const T* data) {
+
+    size_t size = mem->size / sizeof(T);
+    T* ptr = (T*)mem->virt_addr;
+    for (size_t i = 0; i < size; ++i) {
+        ptr[i] = (T)data[i];
+    }
+    rknn_matmul_set_io_mem(*ctx, mem, attr);
+}
+
 
 #endif
 

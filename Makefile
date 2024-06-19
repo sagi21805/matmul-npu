@@ -2,19 +2,16 @@
 CXX = g++
 
 # Define the source file
-SRC = matmul-test.cpp
+SRC = example.cpp
 
 # Define the output executable
-TARGET = matmul-test	
+TARGET = example
 
 # Define the include directories
-INC_DIRS = -I/usr/local/include/rknpu -I/usr/include/aarch64-linux-gnu/
-
-# Define the library directories
-LIB_DIRS = -L/usr/lib/aarch64-linux-gnu/
+INC_DIRS = -I/usr/local/include/rknpu
 
 # Define the libraries to link against
-LIBS = -lrknnrt -lcblas
+LIBS = -lrknnrt
 
 # Define the compilation flags
 CXXFLAGS = $(INC_DIRS) $(LIB_DIRS) $(LIBS)
@@ -27,7 +24,3 @@ $(TARGET): $(SRC)
 .PHONY: clean
 clean:
 	rm -f $(TARGET)
-
-# Include dependencies (optional, useful if you have header files)
-# DEP = $(SRC:.cpp=.d)
-# -include $(DEP)

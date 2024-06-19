@@ -1,22 +1,21 @@
-#ifndef MATMUL_UTILS
-#define MATMUL_UTILS
+#ifndef MATMUL_NPU
+#define MATMUL_NPU
 
-#include <chrono>
-#include <iostream>
-#include <vector>
-#include <random>
-#include <cstring>
-#include <array>
-
-#include <cblas.h>
 #include <rknpu/rknn_matmul_api.h>
 #include <type_traits>
-// #include "Float16.h"
 
 typedef float float32;
 typedef __fp16 float16;
 
-
+/**
+ * @brief Utility function to choose flag from the _rknn_matmul_types
+ * 
+ * @param To    The type of the output matrix
+ * @param Ti1   The type of the first input martix
+ * @param Ti2   The type of the second input matrix
+ * 
+ * @return _rknn_matmul_ type flag for the matmul operation
+ */
 template<typename To, typename Ti1, typename Ti2>
 _rknn_matmul_type choose_flag() {
     if constexpr (
@@ -51,7 +50,12 @@ _rknn_matmul_type choose_flag() {
 
 }
 
-
+/**
+ * Struct that wraps all the built in rknn types 
+ * and contains the result pointer
+ * 
+ * @param To The type of the output matrix
+ */
 template<typename To> 
 struct _matmul_ctx {
     rknn_context ctx;
@@ -61,10 +65,17 @@ struct _matmul_ctx {
     rknn_tensor_mem* matrixB;
     rknn_tensor_mem* matrixC;
 
-    To* matrixC_ptr;
+    To* result;
 
 };
 
+/**
+ * @brief Create a matmul operation for the npu
+ * 
+ * @param To The type of the output matrix
+ * 
+ * @return _matmul_ctx with the currect context for the rknn_matmul_run function
+ */
 template<typename To> 
 _matmul_ctx<To>* make_matmul(
     int32_t num_rows_a, int32_t num_cols_a, int32_t num_cols_b, _rknn_matmul_type type
@@ -96,8 +107,10 @@ _matmul_ctx<To>* make_matmul(
     matmul_ctx->matrixB = rknn_create_mem(matmul_ctx->ctx, matmul_ctx->io_attr.B.size);
     matmul_ctx->matrixC = rknn_create_mem(matmul_ctx->ctx, matmul_ctx->io_attr.C.size);
 
-    matmul_ctx->matrixC_ptr = (To*)matmul_ctx->matrixC->virt_addr;
+    // set the result pointer to point on where the result will be
+    matmul_ctx->result = (To*)matmul_ctx->matrixC->virt_addr;
 
+    // set the memory in the npu
     rknn_matmul_set_io_mem(matmul_ctx->ctx, matmul_ctx->matrixA, &matmul_ctx->io_attr.A);
     rknn_matmul_set_io_mem(matmul_ctx->ctx, matmul_ctx->matrixB, &matmul_ctx->io_attr.B);
     rknn_matmul_set_io_mem(matmul_ctx->ctx, matmul_ctx->matrixC, &matmul_ctx->io_attr.C);
@@ -105,7 +118,14 @@ _matmul_ctx<To>* make_matmul(
     return matmul_ctx;
 }
 
-
+/**
+ * @brief Set the matrix data in the npu
+ * 
+ * @param Ti The type of the input matrix
+ * @param ctx The context for the matmul operation
+ * @param mem The information of the matrix tensor memory
+ * @param attr The attributes of the matrix tensor
+ */
 template<typename Ti> 
 void set_matrix_data(
     rknn_matmul_ctx* ctx, 
@@ -121,6 +141,12 @@ void set_matrix_data(
     rknn_matmul_set_io_mem(*ctx, mem, attr);
 }
 
+/**
+ * @brief Free the matrices tensors 
+ * 
+ * @param To The type of the input matrix
+ * @param ctx The context of the matmul operation
+ */
 template<typename To> 
 void free_matmul(_matmul_ctx<To>* ctx) {
     rknn_destroy_mem(ctx->ctx, ctx->matrixA);
@@ -132,7 +158,21 @@ void free_matmul(_matmul_ctx<To>* ctx) {
     free(ctx);
 }
 
-
+/**
+ * @brief Performs matrix multiplication on the npu 
+ * 
+ * @param To - The type of the output matrix 
+ * @param Ti1 - The type of the first input matrix (inferred automatically) 
+ * @param Ti2 - The type of the second input matrix (inferred automatically) 
+ * @param num_rows_a The number of rows in the first input mat
+ * @param num_cols_a The number of columns in the first input mat
+ * @param num_cols_b The number of columns in the second input mat
+ * @param a The data of the first input matrix 
+ * @param b The data of the second input matrix 
+ * 
+ * @return _matmul_ctx<To> that has inside the outPtr which is the result of the matmul, 
+ *         The shape of the result is (num_rows_a X num_cols_b)
+ */
 template<typename To, typename Ti1, typename Ti2> 
 _matmul_ctx<To>* matmul_npu(
     uint32_t num_rows_a,

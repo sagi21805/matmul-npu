@@ -3,6 +3,8 @@
 
 #include <rknpu/rknn_matmul_api.h>
 #include <type_traits>
+#include <iostream>
+#include <cstring>
 
 typedef float float32;
 typedef __fp16 float16;
@@ -70,7 +72,7 @@ struct _matmul_ctx {
 };
 
 /**
- * @brief Create a matmul operation for the npu
+ * @brief ## __Create a matmul operation for the npu__
  * 
  * @param To The type of the output matrix
  * 
@@ -170,8 +172,9 @@ void free_matmul(_matmul_ctx<To>* ctx) {
  * @param a The data of the first input matrix 
  * @param b The data of the second input matrix 
  * 
- * @return _matmul_ctx<To> that has inside the outPtr which is the result of the matmul, 
- *         The shape of the result is (num_rows_a X num_cols_b)
+ * @return _matmul_ctx<To> that has inside the pointer to the result of the matmul.
+ * 
+ * @note The shape of the result is (num_rows_a, num_cols_b)
  */
 template<typename To, typename Ti1, typename Ti2> 
 _matmul_ctx<To>* matmul_npu(

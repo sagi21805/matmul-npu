@@ -11,7 +11,7 @@ INC_DIRS = -I/usr/local/include/rknpu -I./
 LIBS = -lrknnrt -fopenmp
 
 # Define the compilation flags
-CXXFLAGS = $(INC_DIRS) $(LIB_DIRS) $(LIBS) -Wall -Wextra -pedantic
+CXXFLAGS = $(INC_DIRS) $(LIB_DIRS) $(LIBS) -Wall -Wextra -pedantic -O3
 
 # Define the rule to build the target
 example: example.cpp

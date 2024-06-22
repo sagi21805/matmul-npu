@@ -153,8 +153,6 @@ template<typename To>
 void free_matmul(_matmul_ctx<To>* ctx) {
     rknn_destroy_mem(ctx->ctx, ctx->matrixA);
     rknn_destroy_mem(ctx->ctx, ctx->matrixB);
-    rknn_destroy_mem(ctx->ctx, ctx->matrixC);
-
     rknn_matmul_destroy(ctx->ctx);
 
     free(ctx);
@@ -177,7 +175,7 @@ void free_matmul(_matmul_ctx<To>* ctx) {
  * @note The shape of the result is (num_rows_a, num_cols_b)
  */
 template<typename To, typename Ti1, typename Ti2> 
-_matmul_ctx<To>* matmul_npu(
+rknn_tensor_mem* matmul_npu(
     uint32_t num_rows_a,
     uint32_t num_cols_a,
     uint32_t num_cols_b,
@@ -193,7 +191,10 @@ _matmul_ctx<To>* matmul_npu(
     set_matrix_data(&ctx->ctx, ctx->matrixB, &ctx->io_attr.B, b);
     rknn_matmul_run(ctx->ctx);
 
-    return ctx;
+    rknn_tensor_mem* result = ctx->matrixC;
+    free_matmul(ctx);
+
+    return result;
 
 }
 

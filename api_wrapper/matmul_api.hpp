@@ -19,7 +19,7 @@ typedef __fp16 float16;
  * @return _rknn_matmul_ type flag for the matmul operation
  */
 template<typename To, typename Ti1, typename Ti2>
-_rknn_matmul_type choose_flag() {
+_rknn_matmul_type choose_matmul_type() {
     if constexpr (
         std::is_same_v<float16, Ti1> && 
         std::is_same_v<float16, Ti2> && 
@@ -58,7 +58,6 @@ _rknn_matmul_type choose_flag() {
  * 
  * @param To The type of the output matrix
  */
-template<typename To> 
 struct _matmul_ctx {
     rknn_context ctx;
     rknn_matmul_info info;
@@ -66,9 +65,17 @@ struct _matmul_ctx {
     rknn_tensor_mem* matrixA;
     rknn_tensor_mem* matrixB;
     rknn_tensor_mem* matrixC;
+};
 
-    To* result;
+/**
+ * Struct that contains the result tensor of the matmul and it's context
+ */
+struct tensor_result {
+    rknn_context ctx;
+    rknn_tensor_mem* resultMatrix;
 
+    tensor_result(rknn_context ctx, rknn_tensor_mem* resultMatrix) 
+        : ctx(ctx), resultMatrix(resultMatrix) {}
 };
 
 /**
@@ -78,16 +85,15 @@ struct _matmul_ctx {
  * 
  * @return _matmul_ctx with the currect context for the rknn_matmul_run function
  */
-template<typename To> 
-_matmul_ctx<To>* make_matmul(
+_matmul_ctx* make_matmul(
     int32_t num_rows_a, int32_t num_cols_a, int32_t num_cols_b, _rknn_matmul_type type
     ) {
 
     /* create a matmul_ctx struct */
-    _matmul_ctx<To>* matmul_ctx = (_matmul_ctx<To>*)malloc(sizeof(_matmul_ctx<To>));
+    _matmul_ctx* matmul_ctx = (_matmul_ctx*)malloc(sizeof(_matmul_ctx));
 
     /* set all field to zero */
-    memset(matmul_ctx, 0, sizeof(_matmul_ctx<To>));
+    memset(matmul_ctx, 0, sizeof(_matmul_ctx));
 
     matmul_ctx->info.M             = num_rows_a; /* set first matrix rows */
     matmul_ctx->info.K             = num_cols_a; /* set first matrix cols */
@@ -109,8 +115,6 @@ _matmul_ctx<To>* make_matmul(
     matmul_ctx->matrixB = rknn_create_mem(matmul_ctx->ctx, matmul_ctx->io_attr.B.size);
     matmul_ctx->matrixC = rknn_create_mem(matmul_ctx->ctx, matmul_ctx->io_attr.C.size);
 
-    // set the result pointer to point on where the result will be
-    matmul_ctx->result = (To*)matmul_ctx->matrixC->virt_addr;
 
     // set the memory in the npu
     rknn_matmul_set_io_mem(matmul_ctx->ctx, matmul_ctx->matrixA, &matmul_ctx->io_attr.A);
@@ -138,7 +142,7 @@ void set_matrix_data(
     size_t size = mem->size / sizeof(Ti);
     Ti* ptr = (Ti*)mem->virt_addr;
     for (size_t i = 0; i < size; ++i) {
-        ptr[i] = (Ti)data[i];
+        ptr[i] = data[i];
     }
     rknn_matmul_set_io_mem(*ctx, mem, attr);
 }
@@ -149,14 +153,9 @@ void set_matrix_data(
  * @param To The type of the input matrix
  * @param ctx The context of the matmul operation
  */
-template<typename To> 
-void free_matmul(_matmul_ctx<To>* ctx) {
+void free_matmul(_matmul_ctx* ctx) {
     rknn_destroy_mem(ctx->ctx, ctx->matrixA);
     rknn_destroy_mem(ctx->ctx, ctx->matrixB);
-    rknn_destroy_mem(ctx->ctx, ctx->matrixC);
-
-    rknn_matmul_destroy(ctx->ctx);
-
     free(ctx);
 }
 
@@ -177,7 +176,7 @@ void free_matmul(_matmul_ctx<To>* ctx) {
  * @note The shape of the result is (num_rows_a, num_cols_b)
  */
 template<typename To, typename Ti1, typename Ti2> 
-_matmul_ctx<To>* matmul_npu(
+tensor_result matmul_npu(
     uint32_t num_rows_a,
     uint32_t num_cols_a,
     uint32_t num_cols_b,
@@ -185,13 +184,18 @@ _matmul_ctx<To>* matmul_npu(
     Ti2* b
 ) {
 
-    _matmul_ctx<To>* ctx = make_matmul<To>(num_rows_a, num_cols_a, num_cols_b, choose_flag<To, Ti1, Ti2>());
+    _matmul_ctx* ctx = make_matmul(
+        num_rows_a, num_cols_a, num_cols_b, choose_matmul_type<To, Ti1, Ti2>()
+    );
 
     set_matrix_data(&ctx->ctx, ctx->matrixA, &ctx->io_attr.A, a);
     set_matrix_data(&ctx->ctx, ctx->matrixB, &ctx->io_attr.B, b);
     rknn_matmul_run(ctx->ctx);
 
-    return ctx;
+    tensor_result result(ctx->ctx, ctx->matrixC);
+    free_matmul(ctx);
+
+    return result;
 
 }
 

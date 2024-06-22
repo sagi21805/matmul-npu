@@ -19,7 +19,7 @@ typedef __fp16 float16;
  * @return _rknn_matmul_ type flag for the matmul operation
  */
 template<typename To, typename Ti1, typename Ti2>
-_rknn_matmul_type choose_flag() {
+_rknn_matmul_type choose_matmul_type() {
     if constexpr (
         std::is_same_v<float16, Ti1> && 
         std::is_same_v<float16, Ti2> && 
@@ -138,7 +138,7 @@ void set_matrix_data(
     size_t size = mem->size / sizeof(Ti);
     Ti* ptr = (Ti*)mem->virt_addr;
     for (size_t i = 0; i < size; ++i) {
-        ptr[i] = (Ti)data[i];
+        ptr[i] = data[i];
     }
     rknn_matmul_set_io_mem(*ctx, mem, attr);
 }
@@ -185,7 +185,9 @@ _matmul_ctx<To>* matmul_npu(
     Ti2* b
 ) {
 
-    _matmul_ctx<To>* ctx = make_matmul<To>(num_rows_a, num_cols_a, num_cols_b, choose_flag<To, Ti1, Ti2>());
+    _matmul_ctx<To>* ctx = make_matmul<To>(
+        num_rows_a, num_cols_a, num_cols_b, choose_matmul_type<To, Ti1, Ti2>()
+    );
 
     set_matrix_data(&ctx->ctx, ctx->matrixA, &ctx->io_attr.A, a);
     set_matrix_data(&ctx->ctx, ctx->matrixB, &ctx->io_attr.B, b);

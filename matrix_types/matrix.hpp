@@ -7,6 +7,7 @@ class Matrix {
     private:
 
         rknn_tensor_mem* tensor_mem;
+        rknn_context ctx;
 
     public: 
 
@@ -16,18 +17,28 @@ class Matrix {
         Matrix() = default;
 
         Matrix(int rows, int cols, T* data) 
-        : tensor_mem(nullptr), rows(rows), cols(cols), data(data) {}
+        : tensor_mem(nullptr), ctx(0), rows(rows), cols(cols), data(data) {}
 
-        Matrix(rknn_tensor_mem* tensor_mem, int rows, int cols, T* data) 
-        : tensor_mem(tensor_mem), rows(rows), cols(cols), data(data) {}
+        Matrix(rknn_tensor_mem* tensor_mem, rknn_context ctx, int rows, int cols, T* data) 
+        : tensor_mem(tensor_mem), ctx(ctx), rows(rows), cols(cols), data(data) {}
+
+        ~Matrix() {
+            rknn_destroy_mem(ctx, tensor_mem);
+            rknn_matmul_destroy(ctx);
+        }
         
         template<typename To, typename Ti>
         Matrix<To> matmul(Matrix<Ti> mat) {
-            rknn_tensor_mem* tensor_mem = matmul_npu<To, T, Ti>(
+            tensor_result result = matmul_npu<To, T, Ti>(
                 this->rows, this->cols, mat.cols, this->data, mat.data
             );
             
-            return Matrix<To>(tensor_mem, rows, cols, (To*) tensor_mem->virt_addr); 
+            return Matrix<To>(
+                result.resultMatrix, 
+                result.ctx,
+                rows, mat.cols, 
+                (To*) result.resultMatrix->virt_addr
+            ); 
     } 
 
 

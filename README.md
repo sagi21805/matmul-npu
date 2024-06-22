@@ -8,23 +8,26 @@ This library designed to perform matrix multiplication on a Neural Processing Un
 
 ## Usage
 ```c++
-#include "matmul_npu.hpp"
+#include "matrix_types/matrix.hpp"
 #include <iostream>
 #include <vector>
 
 int main() {
 
-    int rows = 32;
-    int cols = 32;
+    int rows = 4096;
+    int cols = 4096;
 
-    std::vector<float16> a(rows*cols, 0.2);
+    std::vector<int8_t> a(rows*cols, 2);
 
-    std::vector<float16> b(rows*cols, 0.3);
+    std::vector<int8_t> b(rows*cols, 3);
 
-    _matmul_ctx<float32>* ctx = matmul_npu<float32>(rows, cols, rows, a.data(), b.data());
+    Matrix<int8_t> A(rows, cols, a.data());
+    Matrix<int8_t> B(rows, cols, b.data());
 
-    std::cout << "The first item of the matrix: \n";
-    std::cout << ctx->result[0] << "\n";
+    Matrix<int32_t> C = A.matmul<int32_t>(B);
+
+    std::cout << "The first item of the matrix: ";
+    std::cout << C.data[0] << "\n";
 }
 ```
 

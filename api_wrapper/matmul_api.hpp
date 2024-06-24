@@ -138,18 +138,13 @@ _matmul_ctx* make_matmul(
  * @param mem The information of the matrix tensor memory
  * @param attr The attributes of the matrix tensor
  */
-template<typename Ti> 
 void set_matrix_data(
     rknn_matmul_ctx* ctx, 
     rknn_tensor_mem* mem, 
     rknn_matmul_tensor_attr* attr, 
-    const Ti* data ) {
+    const void* data ) {
 
-    size_t size = mem->size / sizeof(Ti);
-    Ti* ptr = (Ti*)mem->virt_addr;
-    for (size_t i = 0; i < size; ++i) {
-        ptr[i] = data[i];
-    }
+    memcpy(mem->virt_addr, data, mem->size);
     rknn_matmul_set_io_mem(*ctx, mem, attr);
 }
 

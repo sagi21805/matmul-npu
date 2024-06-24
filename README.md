@@ -4,11 +4,13 @@ This library designed to perform matrix multiplication on a Neural Processing Un
 
 ## Installation
   To install the dependencies of this project, please use the `install.sh` file.
+  If you want to use the opencv features, add --opencv=true `./install.sh --opencv=true` 
   (you may have to `chmod +x` it)
 
 ## Usage
 ```c++
 #include "matrix_types/matrix.hpp"
+#include "matrix_types/opencv_mat.hpp"
 #include <iostream>
 #include <vector>
 
@@ -21,6 +23,7 @@ int main() {
 
     std::vector<int8_t> b(rows*cols, 3);
 
+    // without opencv
     Matrix<int8_t> A(rows, cols, a.data());
     Matrix<int8_t> B(rows, cols, b.data());
 
@@ -28,10 +31,19 @@ int main() {
 
     std::cout << "The first item of the matrix: ";
     std::cout << C.data[0] << "\n";
+
+    //with opencv
+    MatNpu A(rows, cols, CV_8S, a.data());
+    MatNpu B(rows, cols, CV_8S, b.data());
+
+    MatNpu C = A.matmul(B, CV_32S);
+
+    std::cout << "The first item of the matrix: ";
+    std::cout << C.at<int32_t>(0, 0) << "\n";
 }
 ```
 
-<br> Also see the `example.cpp` file which can be compiled using the `Makefile` in the repo. <br>
+<br> Also see the `example.cpp` & `example_opencv.cpp` file which can be compiled using the `Makefile` in the repo. <br>
 
 
 ## Features
@@ -43,8 +55,8 @@ supporting various data types such as `float16`, and `int8_t` as input matrices 
 - Simplifies NPU memory management.
 - Provides utility functions to set matrix data and free resources.
 - Performs efficient matrix multiplication on NPUs.
+- Extention of the [OpenCV](https://github.com/opencv/opencv) Mat
 
 ## Future additions 
-  - Compatibility with the opencv Mat.
   - More operations on the NPU. (Dot Product, convolution, etc..)
   - Rust and Python Bindings.

@@ -45,8 +45,8 @@ _rknn_matmul_type choose_matmul_type() {
         std::cout << "please enter types from avilable types\n";
         std::cout << "1. float16, float16, float16\n";
         std::cout << "2. float16, float16, float32\n";
-        std::cout << "5. int8_t, int8_t, int32_t\n";
-        std::cout << "6. int8_t, int8_t, int8_t\n";
+        std::cout << "3. int8_t, int8_t, int32_t\n";
+        std::cout << "4. int8_t, int8_t, int8_t\n";
         abort();
     }
 
@@ -186,6 +186,45 @@ tensor_result matmul_npu(
 
     _matmul_ctx* ctx = make_matmul(
         num_rows_a, num_cols_a, num_cols_b, choose_matmul_type<To, Ti1, Ti2>()
+    );
+
+    set_matrix_data(&ctx->ctx, ctx->matrixA, &ctx->io_attr.A, a);
+    set_matrix_data(&ctx->ctx, ctx->matrixB, &ctx->io_attr.B, b);
+    rknn_matmul_run(ctx->ctx);
+
+    tensor_result result(ctx->ctx, ctx->matrixC);
+    free_matmul(ctx);
+
+    return result;
+
+}
+
+
+/**
+ * @brief Performs matrix multiplication on the npu 
+ * 
+ * @param num_rows_a The number of rows in the first input mat
+ * @param num_cols_a The number of columns in the first input mat
+ * @param num_cols_b The number of columns in the second input mat
+ * @param type The matmul type flag
+ * @param a The data of the first input matrix 
+ * @param b The data of the second input matrix 
+ * 
+ * @return _matmul_ctx<To> that has inside the pointer to the result of the matmul.
+ * 
+ * @note The shape of the result is (num_rows_a, num_cols_b)
+ */
+tensor_result matmul_npu(
+    uint32_t num_rows_a,
+    uint32_t num_cols_a,
+    uint32_t num_cols_b,
+    _rknn_matmul_type type,
+    void* a,
+    void* b
+) {
+
+    _matmul_ctx* ctx = make_matmul(
+        num_rows_a, num_cols_a, num_cols_b, type
     );
 
     set_matrix_data(&ctx->ctx, ctx->matrixA, &ctx->io_attr.A, a);

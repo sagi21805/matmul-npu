@@ -30,6 +30,11 @@ _rknn_matmul_type choose_matmul_type() {
         std::is_same_v<float16, Ti2> && 
         std::is_same_v<float32, To>)  {
         return RKNN_FLOAT16_MM_FLOAT16_TO_FLOAT32;
+    } else if constexpr(
+        std::is_same_v<float16, Ti1> &&
+        std::is_same_v<int8_t, Ti2>  &&
+        std::is_same_v<float16, To> ) { 
+        return RKNN_FLOAT16_MM_INT8_TO_FLOAT16; 
     } else if constexpr (
         std::is_same_v<int8_t, Ti1> && 
         std::is_same_v<int8_t, Ti2> && 
@@ -45,8 +50,9 @@ _rknn_matmul_type choose_matmul_type() {
         std::cout << "please enter types from avilable types\n";
         std::cout << "1. float16, float16, float16\n";
         std::cout << "2. float16, float16, float32\n";
-        std::cout << "3. int8_t, int8_t, int32_t\n";
+        std::cout << "3. float16, int8_t, float16\n";
         std::cout << "4. int8_t, int8_t, int8_t\n";
+        std::cout << "5. int8_t, int8_t, int32_t\n";
         abort();
     }
 

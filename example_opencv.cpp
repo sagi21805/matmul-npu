@@ -26,5 +26,5 @@ int main() {
     std::cout << "Time took: " << elapsed.count() / 1.0E9f << "s\n";
 
     std::cout << "The first item of the matrix: ";
-    std::cout << C << "\n";
+    std::cout << C.at<int32_t>(0, 0) << "\n";
 }

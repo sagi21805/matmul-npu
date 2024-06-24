@@ -1,3 +1,6 @@
+#ifndef MATRIX
+#define MATRIX
+
 #include "api_wrapper/matmul_api.hpp"
 #include <memory>
 
@@ -45,3 +48,4 @@ class Matrix {
 
 };
 
+#endif

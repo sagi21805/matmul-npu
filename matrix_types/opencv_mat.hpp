@@ -1,3 +1,6 @@
+#ifndef MATNPU
+#define MATNPU
+
 #include <opencv4/opencv2/opencv.hpp>
 #include "api_wrapper/matmul_api.hpp"
 #include "utils/choose_type.hpp"
@@ -33,3 +36,5 @@ class MatNpu : public cv::Mat {
             );
         }
 };
+
+#endif

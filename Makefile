@@ -35,4 +35,4 @@ opencv: example_opencv.cpp
 # Define the rule to clean up generated files
 .PHONY: clean
 clean:
-	rm -f example test
+	rm -f example test example_opencv

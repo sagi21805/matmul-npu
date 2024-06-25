@@ -20,30 +20,30 @@ typedef __fp16 float16;
  */
 template<typename To, typename Ti1, typename Ti2>
 _rknn_matmul_type choose_matmul_type() {
-    if constexpr (
-        std::is_same_v<float16, Ti1> && 
-        std::is_same_v<float16, Ti2> && 
-        std::is_same_v<float16, To>) {
+    if (
+        std::is_same<float16, Ti1>::value && 
+        std::is_same<float16, Ti2>::value && 
+        std::is_same<float16, To>::value) {
         return RKNN_FLOAT16_MM_FLOAT16_TO_FLOAT16;
-    } else if constexpr (
-        std::is_same_v<float16, Ti1> && 
-        std::is_same_v<float16, Ti2> && 
-        std::is_same_v<float32, To>)  {
+    } else if (
+        std::is_same<float16, Ti1>::value && 
+        std::is_same<float16, Ti2>::value && 
+        std::is_same<float32, To>::value)  {
         return RKNN_FLOAT16_MM_FLOAT16_TO_FLOAT32;
-    } else if constexpr(
-        std::is_same_v<float16, Ti1> &&
-        std::is_same_v<int8_t, Ti2>  &&
-        std::is_same_v<float16, To> ) { 
+    } else if (
+        std::is_same<float16, Ti1>::value &&
+        std::is_same<int8_t, Ti2>::value  &&
+        std::is_same<float16, To>::value ) { 
         return RKNN_FLOAT16_MM_INT8_TO_FLOAT16; 
-    } else if constexpr (
-        std::is_same_v<int8_t, Ti1> && 
-        std::is_same_v<int8_t, Ti2> && 
-        std::is_same_v<int8_t, To>)  {
+    } else if (
+        std::is_same<int8_t, Ti1>::value && 
+        std::is_same<int8_t, Ti2>::value && 
+        std::is_same<int8_t, To>::value)  {
         return RKNN_INT8_MM_INT8_TO_INT8;
-    } else if constexpr (
-        std::is_same_v<int8_t, Ti1> && 
-        std::is_same_v<int8_t, Ti2> && 
-        std::is_same_v<int32_t, To>)  {
+    } else if (
+        std::is_same<int8_t, Ti1>::value && 
+        std::is_same<int8_t, Ti2>::value && 
+        std::is_same<int32_t, To>::value)  {
         return RKNN_INT8_MM_INT8_TO_INT32;
     } else {
         std::cout << "unsupported combination of types:\n";

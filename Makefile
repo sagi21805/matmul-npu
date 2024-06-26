@@ -9,7 +9,7 @@ RKNPU_INC_DIR = -I/usr/local/include/rknpu/
 
 OPENCV_INC_DIR = -I/usr/local/include/opencv4/
 
-CURRENT_INC_DIR = -I./
+CURRENT_INC_DIR = -I./include
 
 LIB_DIR = -L/usr/local/lib
 

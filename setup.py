@@ -4,8 +4,6 @@ from setuptools.command.build_ext import build_ext
 from setuptools.command.install import install
 from setuptools import setup
 import subprocess
-import importlib
-import inspect
 import shutil
 import os
 

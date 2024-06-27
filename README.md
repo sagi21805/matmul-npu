@@ -8,7 +8,7 @@ This library designed to perform matrix multiplication on a Neural Processing Un
 
 ## Usage
 
-### c++
+### C++
 ```c++
 #include "matrix_types/matrix.hpp"
 #include "matrix_types/opencv_mat.hpp"
@@ -44,7 +44,7 @@ int main() {
 }
 ```
 
-### python
+### Python
 ```python
 import matnpu
 import numpy as np

@@ -69,8 +69,6 @@ if [ "$INSTALL_PYTHON_BINDINGS" = true ]; then
     git clone --depth=1 https://github.com/pybind/pybind11.git
     sudo mv pybind11 /usr/local/include
     rm -rf pybind11 
-    pip3 install pybind11
-    pip3 install pybind11-stubgen mypy
-
+    pip3 install -r requirements.txt
 
 fi

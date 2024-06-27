@@ -5,9 +5,10 @@
 #include <type_traits>
 #include <iostream>
 #include <cstring>
+#include "utils/half.hpp"
 
+using float16 = half_float::half;
 typedef float float32;
-typedef __fp16 float16;
 
 /**
  * @brief Utility function to choose flag from the _rknn_matmul_types

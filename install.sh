@@ -1,19 +1,30 @@
 #!/bin/bash
 
-
 INSTALL_OPENCV=false
+INSTALL_PYTHON_BINDINGS=false
+
 
 case "$1" in
     --opencv=true)
         INSTALL_OPENCV=true
-        echo "[INFO]: Installing with OpenCv"
+        echo "[INFO]: Installing with OpenCV"
         ;;
-    --opencv=false)
-        INSTALL_OPENCV=false
-        echo "[INFO]: Installing without OpenCv"
+    --python=true)
+        INSTALL_PYTHON_BINDINGS=true
+        echo "[INFO]: Installing with Python Bindings"
         ;;
 esac
 
+case "$2" in
+    --python=true)
+        INSTALL_PYTHON_BINDINGS=true
+        echo "[INFO]: Installing with Python Bindings"
+        ;;
+    --opencv=true)
+        INSTALL_OPENCV=true
+        echo "[INFO]: Installing with OpenCV"
+        ;;
+esac
 echo "[INFO]: Installing rknn-toolkit2 dependencies"
 
 cd ~    
@@ -49,5 +60,16 @@ if [ "$INSTALL_OPENCV" = true ]; then
     sudo make install
     cd ~ 
     rm -rf ./opencv
+
+fi
+
+if [ "$INSTALL_PYTHON_BINDINGS" = true ]; then
+
+    cd ~
+    git clone --depth=1 https://github.com/pybind/pybind11.git
+    sudo mv pybind11 /usr/local/include
+    rm -rf pybind11 
+    pip3 install -r requirements.txt
+    python3 setup.py install --user
 
 fi

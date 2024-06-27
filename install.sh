@@ -70,5 +70,6 @@ if [ "$INSTALL_PYTHON_BINDINGS" = true ]; then
     sudo mv pybind11 /usr/local/include
     rm -rf pybind11 
     pip3 install -r requirements.txt
+    python3 setup.py install --user
 
 fi

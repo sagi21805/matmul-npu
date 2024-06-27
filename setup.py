@@ -1,10 +1,11 @@
 # setup.py
-from setuptools import setup
 from pybind11.setup_helpers import Pybind11Extension
-from setuptools.command.install import install
-import subprocess
-from setuptools.command.install import install
 from setuptools.command.build_ext import build_ext
+from setuptools.command.install import install
+from setuptools import setup
+import subprocess
+import importlib
+import inspect
 import shutil
 import os
 
@@ -13,7 +14,12 @@ module_name = "matnpu"
 ext_modules = [
     Pybind11Extension(
         f"{module_name}",
-        ["bindings.cpp", "test.cpp"],
+        ["src/bindings.cpp"],
+        
+        include_dirs=["./include", "./", "/usr/local/include/rknpu"],
+        library_dirs = ["/usr/local/lib"],
+        libraries=['rknnrt'],
+        extra_compile_args = ["-fopenmp"]
     ),
 ]
 
@@ -27,23 +33,25 @@ def generate_init_file(build_lib, module_name):
     with open(init_file_path, 'w') as f:
         f.write(f"from {module_name}.{module_name} import *\n")
 
+
+
 class CustomInstallCommand(install):
     """Custom install command to ensure the extension is built before generating stubs."""
     def run(self):
         super().run()
         self.generate_pyi()
+        # self.add_docstrings()
         self.cleanup()
 
     def generate_pyi(self):
         # Run stubgen and place example.pyi in the package directory
-        subprocess.run(["stubgen", "-m", f"{module_name}.{module_name}", "-o", self.install_lib])
-        # subprocess.run(["mv", f"{output_dir}/{module_name}.pyi", f"{output_dir}/__init__.pyi"])
+        subprocess.run(["stubgen", "-m", f"{module_name}.{module_name}", "-o", self.install_lib, "--include-docstrings"])
 
     def cleanup(self):
         # Clean up build and egg-info directories
         shutil.rmtree("build", ignore_errors=True)
         shutil.rmtree(module_name + ".egg-info", ignore_errors=True)
-        
+
 
 class CustomBuildExt(build_ext):
     def run(self):

@@ -7,6 +7,8 @@ This library designed to perform matrix multiplication on a Neural Processing Un
   If you want to use the opencv and or python features, add the --opencv=true and or --python=true accordingly.
 
 ## Usage
+
+### c++
 ```c++
 #include "matrix_types/matrix.hpp"
 #include "matrix_types/opencv_mat.hpp"
@@ -42,6 +44,7 @@ int main() {
 }
 ```
 
+### python
 ```python
 import matnpu
 import numpy as np
@@ -69,7 +72,8 @@ supporting various data types such as `float16`, and `int8_t` as input matrices 
 - Provides utility functions to set matrix data and free resources.
 - Performs efficient matrix multiplication on NPUs.
 - Extention of the [OpenCV](https://github.com/opencv/opencv) Mat
+- Python bindings
 
 ## Future additions 
   - More operations on the NPU. (Dot Product, convolution, etc..)
-  - Rust and Python Bindings.
+  - Rust Bindings.
